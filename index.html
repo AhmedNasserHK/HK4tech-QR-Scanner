@@ -95,7 +95,7 @@
             <p style="color: blue;" id="result"></p>
     </div>
 	<input type="text" id="text" />
-		<input type="button" id="btn" value="Submit" onClick="javascript: window.open('' + document.getElementById('result').value);" />
+		<input type="button" id="btn" value="Submit" onClick="javascript: window.open('' + document.getElementById('result').textContent);" />
     <script>
         const html5Qrcode = new Html5Qrcode('reader');
         const qrCodeSuccessCallback = (decodedText, decodedResult)=>{
