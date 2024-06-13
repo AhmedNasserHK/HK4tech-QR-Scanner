@@ -107,6 +107,23 @@
         const config = {fps:10, qrbox:{width:250, height:250}}
         html5Qrcode.start({facingMode:"environment"}, config,qrCodeSuccessCallback );
     </script>
+	<script type="text/javascript">
+	var form       = document.querySelector('#my-form'),
+      text_field = document.querySelector('#reference-number');
+
+  function submitHandler(){
+    // build the new url and open a new window
+    var url = document.getElementById('result').textContent = decodedText;
+    window.open(url);
+
+    // prevent form from being submitted because we already 
+    // called the request in a new window
+    return false;
+  }
+
+  // attach custom submit handler
+  form.onsubmit = submitHandler;
+</script>
 </body>
 </html>
 
