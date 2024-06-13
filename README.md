@@ -1,33 +1,16 @@
-<p style="text-align: center;"><strong>QR Code scanner for login hotspot MikroTik</em></p>
+# HK-Projcts QR Reader
+## QR Code scanner for login hotspot MikroTik
 
-<p style="text-align: center;"><strong>How to use</em></p>
+### How to use
 
-<p style="text-align: center;"><strong>Add a button in login.html</em></p>
-
-<p style="text-align: center;"><strong>(<button onclick="window.location='https://ahmednasserhk.github.io/myqr/';">QR Code</button>)</em></p>
-
-<p style="text-align: center;"><strong>Add the following script to MikroTik via Terminal.</em></p>
-
-<p style="text-align: center;"><strong>(/ip hotspot walled-garden ip
-add action=accept comment="Mikhmon QR Code Scanner" disabled=no dst-host=ahmednasserhk.github.io/myqr)</em></p>
-  
-<p style="text-align: center;"><strong>xxxxxxxxxxxxxx.</em></p>
-  
-<p style="text-align: center;"><strong>xxxxxxxxxxxxxx.</em></p>
-  
-<p style="text-align: center;"><strong>xxxxxxxxxxxxxx.</em></p>
-
-***********************
-**QR Code scanner for login hotspot MikroTik**
-
-**How to use**
-
-**Add a button in login.html**
-<button onclick="window.location='https://ahmednasserhk.github.io/myqr/';">QR Code</button>
-
-**Add the following script to MikroTik via Terminal.**
+1. Add a button in login.html
+```html
+<button onclick="window.location='https://ahmednasserhk.github.io/myqr';">QR Code</button>
+```
+2. Add the following script to MikroTik via Terminal.
+```
 /ip hotspot walled-garden ip
-add action=accept comment="Mikhmon QR Code Scanner" disabled=no dst-host=ahmednasserhk.github.io/myqr
+add action=accept comment="HK-Projects QR Code Scanner" disabled=no dst-host=ahmednasserhk.github.io
+```
 
-
-**Powered by hk4tech.com**
+### Powered by hk4tech.com
