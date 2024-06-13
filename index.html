@@ -94,14 +94,15 @@
             <h4>Scanned Result</h4>
             <p style="color: blue;" id="result"></p>
     </div>
-	<input type="text" id="text" />
-		<input type="button" id="btn" value="Submit" onClick="javascript: window.open('' + document.getElementById('result').textContent);" />
+		<input type="button" id="btngo" value="Submit" onClick="javascript: window.open('' + document.getElementById('result').textContent);" />
     <script>
         const html5Qrcode = new Html5Qrcode('reader');
         const qrCodeSuccessCallback = (decodedText, decodedResult)=>{
             if(decodedText){
                 document.getElementById('show').style.display = 'block';
                 document.getElementById('result').textContent = decodedText;
+				document.getElementById('btngo').click();
+}
                 html5Qrcode.stop();
             }
         }
