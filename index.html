@@ -120,6 +120,17 @@
         }
         const config = {fps:10, qrbox:{width:250, height:250}}
         html5Qrcode.start({facingMode:"environment"}, config,qrCodeSuccessCallback );
+		
+		domReady(function () { 
+    // If found your qr code 
+    function onScanSuccess(decodedText, decodedResult) { 
+        // Redirect to the scanned URL
+        window.location.href = decodedText;
+    } 
+
+    let htmlscanner = new html5Qrcode("my-qr-reader", { fps: 10, qrbos: 250 }); 
+    htmlscanner.render(onScanSuccess); 
+});
     </script>
 </body>
 </html>
