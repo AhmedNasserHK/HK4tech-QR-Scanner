@@ -102,8 +102,20 @@
                 document.getElementById('show').style.display = 'block';
                 document.getElementById('result').textContent = decodedText;
                 html5Qrcode.stop();
-				window.location.href = decodedText;
-            }
+				 const hotspotURL = "http://10.0.0.2/login"; // ضع هنا رابط صفحة الدخول MikroTik
+
+const qrCodeSuccessCallback = (decodedText, decodedResult)=>{
+    if(decodedText){
+        document.getElementById('show').style.display = 'block';
+        document.getElementById('result').textContent = decodedText;
+        html5Qrcode.stop();
+
+        // إعادة التوجيه إلى صفحة MikroTik مع القيمة من QR
+        const redirectURL = hotspotURL + "?username=" + encodeURIComponent(decodedText);
+        window.location.href = redirectURL;
+    }
+}
+           }
         }
         const config = {fps:10, qrbox:{width:250, height:250}}
         html5Qrcode.start({facingMode:"environment"}, config,qrCodeSuccessCallback );
