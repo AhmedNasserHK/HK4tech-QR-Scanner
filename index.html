@@ -1,153 +1,609 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar" dir="rtl">
 <head>
-  
-<meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-<title>AhmedNasserHK QR CODE SCANNER</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>AhmedNasserHK QR CODE SCANNER</title>
   <style>
-    body{
-      background-color: #000000;
-      color :#ffffff;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
-    video {
-      width: 100%    !important;
-      height: auto   !important;
+
+    body {
+      background: radial-gradient(circle at 20% 30%, #0a0f1e, #03050b);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-family: system-ui, 'Segoe UI', 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+      padding: 1rem;
     }
-    .btn{
-      margin-top:5px;
-      margin-bottom:10px;
-      padding:5px;
-      background-color: #f2f2f2;
-      color: #000000;
-      border-radius:3px;
-      width: 150px;
-      cursor: pointer;
+
+    /* MAIN CARD */
+    .scanner-card {
+      max-width: 560px;
+      width: 100%;
+      background: rgba(12, 18, 28, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 3rem;
+      border: 1px solid rgba(72, 187, 255, 0.25);
+      box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5), 0 0 0 0.5px rgba(0, 255, 255, 0.1);
+      padding: 1.5rem 1.2rem 2rem;
+      transition: all 0.2s ease;
     }
-    .camera{
-      width: 95%;
-    }
-    a{
-      text-decoration: none;
-      color:#20a8d8;
-    }
-    @font-face {
-      font-family: 'fontello';
-      src: url('./font/fontello.eot?14907215');
-      src: url('./font/fontello.eot?14907215#iefix') format('embedded-opentype'),
-           url('./font/fontello.woff?14907215') format('woff'),
-           url('./font/fontello.ttf?14907215') format('truetype'),
-           url('./font/fontello.svg?14907215#fontello') format('svg');
-      font-weight: normal;
-      font-style: normal;
-    }
-    .icon
-    {
-      font-family: "fontello";
-      font-style: normal;
-      font-weight: normal;
-      speak: none;
-      display: inline-block;
-      text-decoration: inherit;
-      width: 1em;
-      margin-right: .2em;
+
+    /* HEADER */
+    .brand {
       text-align: center;
-      font-variant: normal;
-      text-transform: none;
-      line-height: 1em;
-      margin-left: .2em;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
+      margin-bottom: 1.4rem;
+    }
+    .brand h1 {
+      font-size: 1.7rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, #E0F2FE, #38BDF8);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: -0.3px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand h1::before {
+      content: "◈";
+      font-weight: 300;
+      color: #2dd4bf;
+      background: none;
+      -webkit-background-clip: unset;
+      background-clip: unset;
+      font-size: 1.6rem;
+    }
+    .brand h1::after {
+      content: "◈";
+      font-weight: 300;
+      color: #2dd4bf;
+      background: none;
+      -webkit-background-clip: unset;
+      font-size: 1.6rem;
+    }
+    .sub {
+      font-size: 0.75rem;
+      text-align: center;
+      color: #8AA0BC;
+      margin-top: 6px;
+      letter-spacing: 0.3px;
+    }
+
+    /* QR READER ZONE */
+    .reader-container {
+      background: #00000022;
+      border-radius: 2rem;
+      padding: 0.2rem;
+      margin: 0.8rem 0 1rem;
+      position: relative;
+    }
+    #reader {
+      width: 100%;
+      border-radius: 1.8rem;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+    /* style overrides for html5-qrcode camera stream */
+    #reader video {
+      border-radius: 1.6rem !important;
+      width: 100% !important;
+      object-fit: cover !important;
+    }
+    /* scan region highlight */
+    #reader__scan_region {
+      background: transparent !important;
+    }
+
+    /* result panel (glass) */
+    .result-panel {
+      background: rgba(5, 10, 20, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 2rem;
+      margin: 1rem 0 1.2rem;
+      padding: 0.9rem 1.2rem;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      transition: 0.2s;
+      display: none;
+    }
+    .result-panel.show {
+      display: block;
+      animation: fadeSlideUp 0.3s ease-out;
+    }
+    .result-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 500;
+      color: #7ad0ff;
+      margin-bottom: 8px;
+    }
+    .result-value {
+      font-size: 1rem;
+      font-weight: 500;
+      word-break: break-all;
+      color: #f0f9ff;
+      background: #0a101ccc;
+      padding: 12px 14px;
+      border-radius: 1.5rem;
+      font-family: 'SF Mono', monospace;
+      border-left: 3px solid #38bdf8;
+    }
+    .action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin: 12px 0 8px;
+    }
+    .btn {
+      background: rgba(20, 28, 40, 0.9);
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      padding: 10px 20px;
+      border-radius: 40px;
+      font-weight: 500;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #e2edff;
+      backdrop-filter: blur(4px);
+      font-family: inherit;
+    }
+    .btn i {
+      font-style: normal;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    .btn-primary {
+      background: #0e2a3b;
+      border-color: #2dd4bf;
+      color: #ccf0ff;
+      box-shadow: 0 2px 6px rgba(0,160,255,0.2);
+    }
+    .btn-primary:active {
+      transform: scale(0.96);
+      background: #1e3a5f;
+    }
+    .btn-chrome {
+      border-color: #f4b942;
+      background: #1f1b10cc;
+    }
+    .btn-safari {
+      border-color: #3b9eff;
+      background: #102433cc;
+    }
+    .btn:hover {
+      background: #1f2a3e;
+      border-color: #7ad0ff;
+      transform: translateY(-1px);
+    }
+    .footer-note {
+      margin-top: 1rem;
+      text-align: center;
+      font-size: 0.7rem;
+      color: #6e85aa;
+    }
+    .footer-note a {
+      color: #6bc2ff;
+      text-decoration: none;
+    }
+    @keyframes fadeSlideUp {
+      0% { opacity: 0; transform: translateY(12px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    /* responsive adjustments */
+    @media (max-width: 550px) {
+      .scanner-card {
+        padding: 1rem 0.9rem 1.5rem;
+      }
+      .btn {
+        padding: 8px 14px;
+        font-size: 0.75rem;
+      }
+      .brand h1 {
+        font-size: 1.4rem;
+      }
+    }
+    /* camera reload button icon */
+    .icon-symbol {
+      font-weight: 600;
+      display: inline-block;
+    }
+    /* status badge */
+    .status-badge {
+      font-size: 0.7rem;
+      text-align: center;
+      color: #57b5ff;
+      margin-top: 6px;
+    }
+    /* language toggle button special */
+    .lang-toggle {
+      background: rgba(45, 212, 191, 0.15);
+      border-color: #2dd4bf;
+      margin-left: auto;
+      margin-right: auto;
+      font-weight: 600;
+    }
+    .top-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 0.2rem;
+    }
+    /* rtl / ltr handling */
+    body[dir="ltr"] .scanner-card,
+    body[dir="ltr"] .result-value {
+      text-align: left;
+    }
+    body[dir="rtl"] .result-value {
+      text-align: right;
+      border-left: none;
+      border-right: 3px solid #38bdf8;
     }
   </style>
-
+  <!-- html5-qrcode library (lightweight, standalone) -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
-
 <body>
-  <center>
-    <div id="main">
-      <div id="mainbody">
-        <div class="camera" id="outdiv"></div>
-        <div style="display: table;">
-          <div style="display: table-row;">
-            <div style="display: table-cell; padding:3px;">
-              <div class="btn" id="reload" onclick="location.reload();"><i class="icon icon-arrows-cw">&#xe800;</i> Reload Camera</div>
-            </div>
-            <div style="display: table-cell; padding:3px;">
-              <a class="btn" href="intent://ahmednasserhk.github.io/HK4tech-QR-Scanner/#Intent;scheme=http;package=com.android.chrome;end"><i class="icon icon-chrome-1">&#xf268;</i> Open in Chrome</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div>AhmedNasserHK QR CODE SCANNER <br>Powered by <a href="http://www.hk4tech.com">HK Projects</a></div>
-	
-  </center>
-<canvas style="display:none;" id="qr-canvas" width="800" height="600"></canvas>
-    <script src="./qrScript.js"></script>
-    <div style="text-align: center;">
-        <div id="reader" style="width: 500px;"></div>
-        <div id="show" style="display: none;">
-            <h4>Scanned Result</h4>
-            <p style="color: blue;" id="result"></p>
-    </div>
-		
-    <script>
-        const hotspotURL = "http://10.0.0.1/login";
-        let html5Qrcode = null;
-        let redirectPending = false;
+<div class="scanner-card">
+  <div class="top-row">
+    <button class="btn lang-toggle" id="langToggleBtn"><i>🌐</i> <span id="langToggleText">English</span></button>
+  </div>
+  <div class="brand">
+    <h1 id="brandTitle">HKP QR SCANNER</h1>
+    <div class="sub" id="brandSub">فورية · خصوصية أولاً · عالمية</div>
+  </div>
 
-        const qrCodeSuccessCallback = (decodedText, decodedResult) => {
-            if(redirectPending) return;
-            if(decodedText && decodedText.trim() !== ""){
-                redirectPending = true;
-                document.getElementById('show').style.display = 'block';
-                document.getElementById('result').textContent = decodedText;
-                
-                if(html5Qrcode && typeof html5Qrcode.stop === 'function'){
-                    html5Qrcode.stop().catch(e => console.warn(e));
-                }
-                
-                let destination = decodedText.trim();
-                if(!destination.startsWith("http://") && !destination.startsWith("https://")){
-                    if(destination.match(/^[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}([\/\?\&].*)?$/)){
-                        destination = "http://" + destination;
-                    } else {
-                        destination = hotspotURL + "?username=" + encodeURIComponent(decodedText);
-                    }
-                }
-                
-                setTimeout(() => {
-                    window.location.href = destination;
-                }, 30);
-            }
-        };
-        
-        const config = {fps:10, qrbox:{width:250, height:250}};
-        
-        function initScanner(){
-            if(typeof Html5Qrcode === 'undefined'){
-                setTimeout(initScanner, 200);
-                return;
-            }
-            html5Qrcode = new Html5Qrcode('reader');
-            html5Qrcode.start({facingMode:"environment"}, config, qrCodeSuccessCallback)
-                .catch(err => {
-                    html5Qrcode.start({facingMode:"user"}, config, qrCodeSuccessCallback)
-                        .catch(err2 => {
-                            document.getElementById('result').innerHTML = "Camera error";
-                            document.getElementById('show').style.display = 'block';
-                        });
-                });
+  <!-- QR reader mount point -->
+  <div class="reader-container">
+    <div id="reader"></div>
+  </div>
+
+  <!-- dynamic result card -->
+  <div id="resultPanel" class="result-panel">
+    <div class="result-label" id="resultLabel">⚡ البيانات المُفكّكة</div>
+    <div class="result-value" id="qrResultText">—</div>
+  </div>
+
+  <!-- button row: reload + browser intents -->
+  <div class="action-buttons">
+    <button class="btn" id="reloadCameraBtn"><i>⟳</i> <span id="reloadBtnText">إعادة تشغيل الكاميرا</span></button>
+    <button class="btn btn-chrome" id="openChromeBtn"><i>🌐</i> <span id="chromeBtnText">فتح في كروم</span></button>
+    <button class="btn btn-safari" id="openSafariBtn"><i>🧭</i> <span id="safariBtnText">فتح في سفاري</span></button>
+  </div>
+  <div class="footer-note">
+    <span id="footerText">✦ مدعوم من <a href="http://www.hk4tech.com">HK Projects</a> • محرك QR عصري ✦</span>
+  </div>
+</div>
+
+<script>
+  (function(){
+    const translations = {
+      ar: {
+        brandTitle: "HKP قارئ باركود",
+        brandSub: "فورية · خصوصية أولاً · عالمية",
+        resultLabel: "⚡ البيانات المُفكّكة",
+        reloadBtn: "إعادة تشغيل الكاميرا",
+        chromeBtn: "فتح في كروم",
+        safariBtn: "فتح في سفاري",
+        footer: "✦ مدعوم من <a href=\"http://www.hk4tech.com\">HK Projects</a> • محرك QR عصري ✦",
+        cameraError: "⚠️ يلزم الإذن للكاميرا. اضغط 'إعادة تشغيل الكاميرا' واسمح بالوصول.",
+        decodedPrefix: "—",
+        langToggle: "English"
+      },
+      en: {
+        brandTitle: "HKP QR SCANNER",
+        brandSub: "instant · privacy-first · universal",
+        resultLabel: "⚡ DECODED DATA",
+        reloadBtn: "Reload Camera",
+        chromeBtn: "Open in Chrome",
+        safariBtn: "Open in Safari",
+        footer: "✦ Powered by <a href=\"http://www.hk4tech.com\">HK Projects</a> • Modern QR Engine ✦",
+        cameraError: "⚠️ Camera permission required. Tap 'Reload Camera' and allow access.",
+        decodedPrefix: "—",
+        langToggle: "العربية"
+      }
+    };
+    
+    let currentLang = "ar";
+    let html5QrCode = null;
+    let isScanning = false;
+    let redirectPending = false;
+    
+    const brandTitleEl = document.getElementById("brandTitle");
+    const brandSubEl = document.getElementById("brandSub");
+    const resultLabelEl = document.getElementById("resultLabel");
+    const reloadBtnSpan = document.getElementById("reloadBtnText");
+    const chromeBtnSpan = document.getElementById("chromeBtnText");
+    const safariBtnSpan = document.getElementById("safariBtnText");
+    const footerSpan = document.getElementById("footerText");
+    const langToggleSpan = document.getElementById("langToggleText");
+    const resultTextSpan = document.getElementById("qrResultText");
+    const resultPanelDiv = document.getElementById("resultPanel");
+    const reloadBtn = document.getElementById("reloadCameraBtn");
+    const chromeBtn = document.getElementById("openChromeBtn");
+    const safariBtn = document.getElementById("openSafariBtn");
+    const readerDiv = document.getElementById("reader");
+    
+    function applyLanguage(lang) {
+      const dict = translations[lang];
+      if (!dict) return;
+      brandTitleEl.innerText = dict.brandTitle;
+      brandSubEl.innerText = dict.brandSub;
+      resultLabelEl.innerText = dict.resultLabel;
+      reloadBtnSpan.innerText = dict.reloadBtn;
+      chromeBtnSpan.innerText = dict.chromeBtn;
+      safariBtnSpan.innerText = dict.safariBtn;
+      footerSpan.innerHTML = dict.footer;
+      langToggleSpan.innerText = dict.langToggle;
+      if (lang === "ar") {
+        document.documentElement.setAttribute("dir", "rtl");
+        document.documentElement.setAttribute("lang", "ar");
+        document.body.style.direction = "rtl";
+      } else {
+        document.documentElement.setAttribute("dir", "ltr");
+        document.documentElement.setAttribute("lang", "en");
+        document.body.style.direction = "ltr";
+      }
+      if (resultTextSpan.innerText === "—" || resultTextSpan.innerText === translations.ar.decodedPrefix || resultTextSpan.innerText === translations.en.decodedPrefix) {
+        resultTextSpan.innerText = dict.decodedPrefix;
+      }
+    }
+    
+    function setLanguageCookie(lang) {
+      const d = new Date();
+      d.setTime(d.getTime() + (365 * 24 * 60 * 60 * 1000));
+      const expires = "expires=" + d.toUTCString();
+      document.cookie = "qr_fusion_lang=" + lang + ";" + expires + ";path=/";
+    }
+    
+    function getLanguageFromCookie() {
+      const name = "qr_fusion_lang=";
+      const decodedCookie = decodeURIComponent(document.cookie);
+      const ca = decodedCookie.split(';');
+      for(let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1);
+        if (c.indexOf(name) === 0) return c.substring(name.length, c.length);
+      }
+      return null;
+    }
+    
+    function toggleLanguage() {
+      const newLang = currentLang === "ar" ? "en" : "ar";
+      currentLang = newLang;
+      applyLanguage(currentLang);
+      setLanguageCookie(currentLang);
+    }
+    
+    const CONFIG = { fps: 10, qrbox: { width: 250, height: 250 } };
+    const HOTSPOT_URL = "http://10.0.0.1/login";
+    
+    async function stopScanner(resetFlag = true) {
+      if (html5QrCode && isScanning) {
+        try {
+          await html5QrCode.stop();
+        } catch (err) {
+          console.warn("stop err:", err);
         }
-        
-        if(document.readyState === 'loading'){
-            document.addEventListener('DOMContentLoaded', initScanner);
-        } else {
-            initScanner();
+        isScanning = false;
+      }
+      if (resetFlag && html5QrCode) {
+      }
+    }
+    
+    async function startScanner() {
+      if (!readerDiv) return;
+      await stopScanner(true);
+      if (html5QrCode) {
+        html5QrCode.clear();
+      }
+      html5QrCode = new Html5Qrcode("reader");
+      
+      const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+        if(redirectPending) return;
+        if (decodedText && decodedText.trim() !== "") {
+          redirectPending = true;
+          resultPanelDiv.classList.add("show");
+          resultTextSpan.innerText = decodedText;
+          
+          if (html5QrCode && isScanning) {
+            html5QrCode.stop().then(() => {
+              isScanning = false;
+            }).catch(e => console.warn);
+          } else {
+            isScanning = false;
+          }
+          
+          try {
+            let destination = decodedText.trim();
+            if(!destination.startsWith("http://") && !destination.startsWith("https://")){
+              if(destination.match(/^[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}([\/\?\&].*)?$/)){
+                destination = "http://" + destination;
+              } else {
+                destination = HOTSPOT_URL + "?username=" + encodeURIComponent(decodedText.trim());
+              }
+            }
+            setTimeout(() => {
+              window.location.href = destination;
+            }, 80);
+          } catch (err) {
+            console.error("redirect error", err);
+            const fallbackUrl = HOTSPOT_URL + "?username=" + encodeURIComponent(decodedText.trim());
+            window.location.href = fallbackUrl;
+          }
         }
-    </script>
+      };
+      
+      const qrErrorCallback = (err) => {
+      };
+      
+      try {
+        await html5QrCode.start(
+          { facingMode: "environment" },
+          CONFIG,
+          qrCodeSuccessCallback,
+          qrErrorCallback
+        );
+        isScanning = true;
+        redirectPending = false;
+      } catch (err) {
+        console.warn("Camera start error, fallback:", err);
+        try {
+          await html5QrCode.start(
+            { facingMode: "user" },
+            CONFIG,
+            qrCodeSuccessCallback,
+            qrErrorCallback
+          );
+          isScanning = true;
+          redirectPending = false;
+        } catch (err2) {
+          console.error("Cannot access camera", err2);
+          resultPanelDiv.classList.add("show");
+          const errorMsg = (currentLang === "ar") ? "⚠️ يلزم الإذن للكاميرا. اضغط 'إعادة تشغيل الكاميرا' واسمح بالوصول." : "⚠️ Camera permission required. Tap 'Reload Camera' and allow access.";
+          resultTextSpan.innerText = errorMsg;
+        }
+      }
+    }
+    
+    async function reloadCamera() {
+      redirectPending = false;
+      resultPanelDiv.classList.remove("show");
+      await stopScanner(true);
+      setTimeout(() => {
+        startScanner().catch(e => {
+          console.error("restart failed", e);
+          resultPanelDiv.classList.add("show");
+          const errMsg = (currentLang === "ar") ? "⚠️ فشل إعادة تشغيل الكاميرا، تحقق من الأذونات." : "⚠️ Camera restart failed, check permissions.";
+          resultTextSpan.innerText = errMsg;
+        });
+      }, 80);
+    }
+    
+    function openInChrome() {
+      const currentPageUrl = window.location.href;
+      const ua = navigator.userAgent.toLowerCase();
+      const isAndroid = ua.includes("android");
+      const isIOS = /iphone|ipad|ipod/.test(ua);
+      
+      if (isAndroid) {
+        const intentUrl = `intent://${window.location.host}${window.location.pathname}${window.location.search}#Intent;scheme=http;package=com.android.chrome;end`;
+        window.location.href = intentUrl;
+        setTimeout(() => {
+          if (document.hasFocus()) {
+            window.location.href = currentPageUrl;
+          }
+        }, 350);
+      } else if (isIOS) {
+        const chromeSchemeUrl = `googlechrome://${window.location.host}${window.location.pathname}${window.location.search}`;
+        window.location.href = chromeSchemeUrl;
+        setTimeout(() => {
+          const msg = (currentLang === "ar") ? "قد لا يكون متصفح كروم مثبتًا. يرجى تثبيت كروم أو استخدام زر سفاري." : "Chrome browser might not be installed. Please install Chrome or use Safari button.";
+          alert(msg);
+        }, 300);
+      } else {
+        window.location.href = currentPageUrl;
+      }
+    }
+    
+    function openInSafari() {
+      const ua = navigator.userAgent.toLowerCase();
+      const isIOS = /iphone|ipad|ipod/.test(ua);
+      const currentUrl = window.location.href;
+      
+      if (isIOS) {
+        const newWin = window.open(currentUrl, "_blank");
+        if (!newWin || newWin.closed || typeof newWin.closed == 'undefined') {
+          const msg = (currentLang === "ar") ? "الرجاء السماح بالنوافذ المنبثقة أو فتح الرابط يدويًا في سفاري." : "Please allow pop-ups or manually open this page in Safari. Alternatively copy the URL.";
+          alert(msg);
+        }
+      } else {
+        window.location.href = currentUrl;
+      }
+    }
+    
+    reloadBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      reloadCamera();
+    });
+    
+    chromeBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (html5QrCode && isScanning) {
+        html5QrCode.stop().catch(e=>console.log);
+        isScanning = false;
+      }
+      openInChrome();
+    });
+    
+    safariBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (html5QrCode && isScanning) {
+        html5QrCode.stop().catch(e=>console.log);
+        isScanning = false;
+      }
+      openInSafari();
+    });
+    
+    const langToggleBtn = document.getElementById("langToggleBtn");
+    langToggleBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      toggleLanguage();
+    });
+    
+    const savedLang = getLanguageFromCookie();
+    if (savedLang && (savedLang === "ar" || savedLang === "en")) {
+      currentLang = savedLang;
+    } else {
+      currentLang = "ar";
+    }
+    applyLanguage(currentLang);
+    
+    startScanner().catch(err => {
+      console.warn("Initial start error", err);
+      resultPanelDiv.classList.add("show");
+      const errMsg = (currentLang === "ar") ? "⚠️ يلزم الإذن للكاميرا. اضغط 'إعادة تشغيل الكاميرا' واسمح بالوصول." : "⚠️ Camera permission required. Tap 'Reload Camera' and allow access.";
+      resultTextSpan.innerText = errMsg;
+    });
+    
+    window.addEventListener("beforeunload", () => {
+      if (html5QrCode && isScanning) {
+        html5QrCode.stop().catch(()=>{});
+      }
+    });
+    
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        if (html5QrCode && isScanning) {
+          html5QrCode.stop().then(() => {
+            isScanning = false;
+          }).catch(()=>{});
+        }
+      } else {
+        if (!isScanning && html5QrCode) {
+          startScanner().catch(e=>console.warn);
+        } else if (!html5QrCode) {
+          startScanner();
+        }
+      }
+    });
+    
+  })();
+</script>
 </body>
 </html>
