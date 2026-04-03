@@ -92,26 +92,32 @@
         <div id="show" style="display: none;">
             <h4>Scanned Result</h4>
             <p style="color: blue;" id="result"></p>
+        </div>
     </div>
 		
     <script>
-        const hotspotURL = "http://10.0.0.1/login"; // ضع هنا رابط صفحة الدخول MikroTik
-        
         const html5Qrcode = new Html5Qrcode('reader');
         const qrCodeSuccessCallback = (decodedText, decodedResult)=>{
             if(decodedText){
+                // عرض النتيجة
                 document.getElementById('show').style.display = 'block';
                 document.getElementById('result').textContent = decodedText;
+                
+                // إيقاف الكاميرا
                 html5Qrcode.stop();
-
-                // إعادة التوجيه إلى صفحة MikroTik مع القيمة من QR
-                const redirectURL = hotspotURL + "?username=" + encodeURIComponent(decodedText);
-                window.location.href = redirectURL;
+                
+                // الانتقال التلقائي إلى الرابط المقروء من QR Code
+                // بعد 1 ثانية لإعطاء وقت لعرض النتيجة
+                setTimeout(() => {
+                    window.location.href = decodedText;
+                }, 1000);
             }
         }
         
         const config = {fps:10, qrbox:{width:250, height:250}}
-        html5Qrcode.start({facingMode:"environment"}, config, qrCodeSuccessCallback);
+        html5Qrcode.start({facingMode:"environment"}, config, qrCodeSuccessCallback).catch(err => {
+            console.log("Error starting camera: ", err);
+        });
     </script>
 </body>
 </html>
