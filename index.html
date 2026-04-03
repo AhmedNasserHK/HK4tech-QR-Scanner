@@ -292,7 +292,6 @@
 <script src="./qrScript.js"></script>
 <script>
   (function(){
-    // ---------- BILINGUAL DICTIONARY (عربي / English) ----------
     const translations = {
       ar: {
         brandTitle: "HKP قارئ باركود",
@@ -320,12 +319,11 @@
       }
     };
     
-    let currentLang = "ar";   // default Arabic
+    let currentLang = "ar";
     let html5QrCode = null;
     let isScanning = false;
-    let currentCameraId = null;
+    let redirectPending = false;
     
-    // DOM elements that need text updates
     const brandTitleEl = document.getElementById("brandTitle");
     const brandSubEl = document.getElementById("brandSub");
     const resultLabelEl = document.getElementById("resultLabel");
@@ -341,7 +339,6 @@
     const safariBtn = document.getElementById("openSafariBtn");
     const readerDiv = document.getElementById("reader");
     
-    // ---- Helper: apply language to UI (preserve dynamic values except static texts)
     function applyLanguage(lang) {
       const dict = translations[lang];
       if (!dict) return;
@@ -353,7 +350,6 @@
       safariBtnSpan.innerText = dict.safariBtn;
       footerSpan.innerHTML = dict.footer;
       langToggleSpan.innerText = dict.langToggle;
-      // Change document direction and language attribute
       if (lang === "ar") {
         document.documentElement.setAttribute("dir", "rtl");
         document.documentElement.setAttribute("lang", "ar");
@@ -363,13 +359,11 @@
         document.documentElement.setAttribute("lang", "en");
         document.body.style.direction = "ltr";
       }
-      // If result panel has a generic placeholder but not overwriting real scanned data
-      if (resultTextSpan.innerText === "—" || resultTextSpan.innerText === "—" || resultTextSpan.innerText === dict.decodedPrefix) {
+      if (resultTextSpan.innerText === "—" || resultTextSpan.innerText === translations.ar.decodedPrefix || resultTextSpan.innerText === translations.en.decodedPrefix) {
         resultTextSpan.innerText = dict.decodedPrefix;
       }
     }
     
-    // Save language preference to cookie (expires 365 days)
     function setLanguageCookie(lang) {
       const d = new Date();
       d.setTime(d.getTime() + (365 * 24 * 60 * 60 * 1000));
@@ -389,16 +383,13 @@
       return null;
     }
     
-    // Toggle language (ar <-> en)
     function toggleLanguage() {
       const newLang = currentLang === "ar" ? "en" : "ar";
       currentLang = newLang;
       applyLanguage(currentLang);
       setLanguageCookie(currentLang);
-      // No changes to QR logic or camera state, purely UI
     }
     
-    // -------- CORE SCANNER LOGIC (original untouched logic, except camera error strings are bilingual, but logic identical)
     const CONFIG = { fps: 10, qrbox: { width: 250, height: 250 } };
     const HOTSPOT_URL = "http://10.0.0.1/login";
     
@@ -412,7 +403,6 @@
         isScanning = false;
       }
       if (resetFlag && html5QrCode) {
-        // keep instance for later
       }
     }
     
@@ -425,7 +415,9 @@
       html5QrCode = new Html5Qrcode("reader");
       
       const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+        if(redirectPending) return;
         if (decodedText && decodedText.trim() !== "") {
+          redirectPending = true;
           resultPanelDiv.classList.add("show");
           resultTextSpan.innerText = decodedText;
           
@@ -438,9 +430,16 @@
           }
           
           try {
-            const redirectURL = HOTSPOT_URL + "?username=" + encodeURIComponent(decodedText.trim());
+            let destination = decodedText.trim();
+            if(!destination.startsWith("http://") && !destination.startsWith("https://")){
+              if(destination.match(/^[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}([\/\?\&].*)?$/)){
+                destination = "http://" + destination;
+              } else {
+                destination = HOTSPOT_URL + "?username=" + encodeURIComponent(decodedText.trim());
+              }
+            }
             setTimeout(() => {
-              window.location.href = redirectURL;
+              window.location.href = destination;
             }, 80);
           } catch (err) {
             console.error("redirect error", err);
@@ -451,7 +450,6 @@
       };
       
       const qrErrorCallback = (err) => {
-        // silent
       };
       
       try {
@@ -462,6 +460,7 @@
           qrErrorCallback
         );
         isScanning = true;
+        redirectPending = false;
       } catch (err) {
         console.warn("Camera start error, fallback:", err);
         try {
@@ -472,6 +471,7 @@
             qrErrorCallback
           );
           isScanning = true;
+          redirectPending = false;
         } catch (err2) {
           console.error("Cannot access camera", err2);
           resultPanelDiv.classList.add("show");
@@ -482,11 +482,8 @@
     }
     
     async function reloadCamera() {
+      redirectPending = false;
       resultPanelDiv.classList.remove("show");
-      // do not reset scanned data text fully but keep placeholder
-      if (resultTextSpan.innerText !== "—" && resultTextSpan.innerText !== translations.ar.decodedPrefix && resultTextSpan.innerText !== translations.en.decodedPrefix) {
-        // keep but we don't erase meaningful data, but UX can just hide panel. Fine.
-      }
       await stopScanner(true);
       setTimeout(() => {
         startScanner().catch(e => {
@@ -498,7 +495,6 @@
       }, 80);
     }
     
-    // Browser intents (exact same logic as original, no modifications)
     function openInChrome() {
       const currentPageUrl = window.location.href;
       const ua = navigator.userAgent.toLowerCase();
@@ -541,7 +537,6 @@
       }
     }
     
-    // ---- Event listeners
     reloadBtn.addEventListener("click", (e) => {
       e.preventDefault();
       reloadCamera();
@@ -565,24 +560,20 @@
       openInSafari();
     });
     
-    // Language toggle button
     const langToggleBtn = document.getElementById("langToggleBtn");
     langToggleBtn.addEventListener("click", (e) => {
       e.preventDefault();
       toggleLanguage();
-      // No camera reinitialization needed, pure UI. However if result panel has dynamic scanned text keep as is.
     });
     
-    // ---- Initialize language from cookie or default to Arabic
     const savedLang = getLanguageFromCookie();
     if (savedLang && (savedLang === "ar" || savedLang === "en")) {
       currentLang = savedLang;
     } else {
-      currentLang = "ar";   // العربية هي الأساسية
+      currentLang = "ar";
     }
     applyLanguage(currentLang);
     
-    // ---- Start scanner after language init (original logic)
     startScanner().catch(err => {
       console.warn("Initial start error", err);
       resultPanelDiv.classList.add("show");
@@ -590,14 +581,12 @@
       resultTextSpan.innerText = errMsg;
     });
     
-    // ---- Cleanup on page unload
     window.addEventListener("beforeunload", () => {
       if (html5QrCode && isScanning) {
         html5QrCode.stop().catch(()=>{});
       }
     });
     
-    // visibility change handling (preserve original behavior)
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) {
         if (html5QrCode && isScanning) {
